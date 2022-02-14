@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- mapper为映射的根节点，
+namespace指定Dao接口的完整类名
+mybatis会依据这个接口动态创建一个实现类去实现这个接口，
+而这个实现类是一个Mapper对象-->
+
+<mapper namespace="mybatis.mapper.EmployeeDynamicSQL">
+
+    <!--dynamic sql-->
+    <select id="getEmpsByConditionIf" resultType="mybatis.bean.Employee">
+        select id,last_name lastName,email,gender from tbl_employee
+            <where>
+                <choose>
+                    <when test="id != null">
+                        id = #{id}
+                    </when>
+                    <when test="lastName != null and lastName != ''">
+                        last_name like #{lastName}
+                    </when>
+                    <when test="email != null and email.trim() != ''">
+                        email = #{email}
+                    </when>
+                    <when test="gender == '男' or gender == '女'">
+                        gender = #{gender}
+                    </when>
+                    <otherwise>
+                        id = 1
+                    </otherwise>
+                </choose>
+            </where>
+    </select>
+
+
+    <update id="updateEmployee">
+        update tbl_employee
+        <set>
+            <if test="lastName != null and lastName != ''">
+                last_name = #{lastName},
+            </if>
+            <if test="email != null and email.trim() != ''">
+                email = #{email},
+            </if>
+            <if test="gender == '男' or gender == '女'">
+                gender = #{gender}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+
+    <!--ids = (1,2,3)-->
+    <select id="getEmpListId" resultType="mybatis.bean.Employee">
+        select id,last_name lastName,email,gender from tbl_employee where id in
+        <foreach collection="list" item="item_ids" separator="," open="(" close=")">
+            #{item_ids}
+        </foreach>
+    </select>
+
+
+    <insert id="addEmp">
+        insert into tbl_employee (id,last_name,gender,email,dept_id)
+        values
+                <foreach collection="emps" item="emp" separator=",">
+                    (#{emp.id},#{emp.lastName},#{emp.gender},#{emp.email},#{emp.dept.id})
+                </foreach>
+    </insert>
+
+
+    <insert id="addEmp02">
+        <foreach collection="emps" item="emp" separator=";">
+            insert into tbl_employee (id,last_name,gender,email,dept_id)
+            values (#{emp.id},#{emp.lastName},#{emp.gender},#{emp.email},#{emp.dept.id})
+        </foreach>
+    </insert>
+
+</mapper>

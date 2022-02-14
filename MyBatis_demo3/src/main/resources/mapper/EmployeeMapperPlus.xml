@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- mapper为映射的根节点，
+namespace指定Dao接口的完整类名
+mybatis会依据这个接口动态创建一个实现类去实现这个接口，
+而这个实现类是一个Mapper对象-->
+
+<mapper namespace="mybatis.mapper.EmployeeMapperPlus">
+
+    <!--映射规则-->
+    <resultMap id="durunwu" type="mybatis.bean.Employee">
+        <!--主键 primaryKey 的映射-->
+        <id column="id" property="id"/>
+
+        <result column="last_name" property="lastName"/>
+        <result column="email" property="email"/>
+        <result column="gender" property="gender"/>
+    </resultMap>
+
+    <select id="getEmployeeById" resultMap="durunwu">
+        select * from tbl_employee where id = #{id}
+    </select>
+
+    <!--级联查询-->
+    <!--注意：使用别名进行配置-->
+    <resultMap id="MyDifMap" type="mybatis.bean.Employee">
+        <id column="id" property="id"/>
+        <result column="last_name" property="lastName"/>
+        <result column="gender" property="gender"/>
+        <result column="email" property="email"/>
+
+        <!--指定关联的javaBean-->
+        <association property="dept" javaType="mybatis.bean.Department">
+            <result column="did" property="id"/>
+            <result column="dept_name" property="departmentName"/>
+        </association>
+
+    </resultMap>
+
+    <select id="getEmployeeByIdTest" resultMap="MyDifMap">
+        SELECT emp.id id,
+               emp.last_name last_name,
+               emp.gender gender,
+               emp.email email,
+               emp.dept_id eid,
+               dept.id did,
+               dept.dept_name dept_name
+        FROM tbl_employee emp,tbl_dept dept
+        WHERE emp.dept_id = dept.id AND emp.dept_id = #{id}
+    </select>
+
+    <!--分布查询-->
+    <!--    id  last_name  gender  email  dept_id  -->
+    <resultMap id="step" type="mybatis.bean.Employee">
+        <id column="id" property="id"/>
+        <result column="last_name" property="lastName"/>
+        <result column="gender" property="gender"/>
+        <result column="email" property="email"/>
+        <association property="dept"
+                     select="mybatis.mapper.DepartmentMapper.getDepartmentById"
+                     column="dept_id">
+        </association>
+
+    </resultMap>
+    <select id="getEmployeeByIdStep" resultMap="step">
+        select * from tbl_employee where id = #{id}
+    </select>
+
+
+    <!--association分布查询-->
+    <select id="getEmpList" resultType="mybatis.bean.Employee">
+        select id,last_name lastName,gender,email
+        from tbl_employee
+        where dept_id = #{deptId}
+    </select>
+
+
+    <!--collection分布查询-->
+    <select id="getEmpListCollection" resultType="mybatis.bean.Employee">
+        select id,last_name lastName,gender,email
+        from tbl_employee
+        where dept_id = #{id}
+    </select>
+
+</mapper>

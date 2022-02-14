@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- mapper为映射的根节点，
+namespace指定Dao接口的完整类名
+mybatis会依据这个接口动态创建一个实现类去实现这个接口，
+而这个实现类是一个Mapper对象-->
+
+<mapper namespace="mybatis.mapper.EmployeeMapper">
+    <!--CacheEnabled-->
+    <cache eviction="FIFO" flushInterval="60000" readOnly="false" size="1024"></cache>
+
+    <!--配置ehcache-->
+<!--    <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>-->
+
+
+<!--id ="接口中的方法名"
+　　parameterType="传入的参数类型"
+　　resultType = "返回实体类对象，使用包.类名"
+    #{id}:待赋值的参数（id）
+-->
+
+    <!--Map<Primarykey,Employee> 返回值写Employee的类型-->
+    <select id="getEmpReturnPrimaryKeyAndEmp" resultType="mybatis.bean.Employee">
+        select * from tbl_employee where last_name like #{lastName}
+    </select>
+
+    <!--之所以能把结果封装到 Map 集合，是因为 resultType="map" mybatis底层自动封装-->
+    <select id="getEmpAfferentReturnMap" resultType="map">
+        select * from tbl_employee where id = #{id}
+    </select>
+    
+    <!--查询多条数据，返回值封装到List 返回值写元素的返回类型-->
+    <select id="getEmpAfferentList" resultType="mybatis.bean.Employee">
+        select * from tbl_employee where last_name like #{lastName}
+    </select>
+
+    <select id="getEmployee" resultType="mybatis.bean.Employee">
+        select * from tbl_employee where id = #{id}
+    </select>
+
+    <select id="getEmployeeTest" resultType="mybatis.bean.Employee">
+        select * from tbl_employee where id = #{id} and last_name = #{lastName}
+    </select>
+
+    <select id="getEmpAfferentMap" resultType="mybatis.bean.Employee">
+        select * from tbl_employee where id = #{id} and last_name = #{lastName}
+    </select>
+
+    <!--获取刚添加的数据的自增的主键 Id    1.使用主键自增的策略  2.指定对应的主键属性-->
+    <insert id="addEmployee" parameterType="mybatis.bean.Employee" useGeneratedKeys="true" keyProperty="id">
+        insert into tbl_employee (last_name,gender,email)
+        values (#{lastName},#{gender},#{email})
+    </insert>
+
+    <update id="updateEmployee">
+        update tbl_employee
+        set last_name = #{lastName},gender=#{gender},email=#{email}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteEmployee">
+        delete from tbl_employee where id = #{id}
+    </delete>
+
+
+
+</mapper>
